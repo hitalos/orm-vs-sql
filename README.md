@@ -47,10 +47,10 @@ Já vamos aproveitar para experimentar 5 métodos. Usaremos o **[GORM](https://g
 |  | GORM | PGX |
 | --- | --- | --- |
 | Média sem Tx | 6,5s | 5,5s |
-| Média com Tx | 550ms | 300ms |
-| Com Batch | n/a | 68ms |
+| Média com Tx | 550ms | 330ms |
+| Com Batch | 90ms | 68ms |
 
-Só aqui já vemos como pode fazer diferença.
+Só aqui já vemos como cada método pode fazer diferença.
 
 Com os dados já importados, agora considere a seguinte pergunta:
 
