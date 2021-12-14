@@ -186,6 +186,13 @@ WHERE qtd > 1
 
 > Subqueries complicam um pouco, mas ao meu ver o GORM consegue piorar essa complexidade!
 
+### Bônus…
+
+.Há também alguns recursos exclusivos de cada BD que nem sempre vão ser contemplados pelo seu ORM porque a intenção da maioria deles é ser uma camada de abstração. Vou deixar alguns exemplos peculiares do postgres.
+
+- Num único comando, dá pra inserir ou atualizar caso já exista um registro conflitante (cláusula "*ON CONFLICT*"). Isso também é conhecido como "*UPSERT*".
+- Pode-se fazer um *INSERT* ou *UPDATE* e pedir pra retornar um ou vários campos do registro de uma só vez. Não fez sentido pra você? Lembre dos campos "autoincrement" ou "created_at" que tem seus valores calculados na hora ou mesmo um campo do tipo "box" que pode ser inserido como `((1,1),(2,2))` mas o valor gravado ou retornado num *select* será `((2,2),(1,1))` (mesmo polígono num plano cartesiano).
+
 ## Concluindo…
 
-Se você tiver que usar um ORM porque a equipe decidiu adotar ou porque "pegou o bonde andando", certifique-se de conhecer um pouco mais que o básico do seu banco de dados para poder fazer o melhor possível e não ser surpreendido por gargalos facilmente evitáveis. Se for "começar do zero", vale mais a pena direcionar seus esforços para ter o melhor domínio possível do seu BD e daí então tomar as suas próprias conclusões sobre a melhor solução para o projeto em questão.
+Se você tiver que usar um ORM porque a equipe decidiu adotar ou porque "pegou o bonde andando", certifique-se de conhecer um pouco mais que o básico do seu banco de dados para poder fazer o melhor possível e não ser surpreendido por gargalos facilmente evitáveis. Se for "começar do zero", vale mais a pena direcionar seus esforços para ter o melhor domínio possível do seu BD e daí então tomar as suas próprias conclusões sobre a melhor solução para o projeto em questão. Aprender a usar certos ORMs pode ser tão custoso quanto aprender uma linguagem nova. Porque não estudar mais SQL então?
