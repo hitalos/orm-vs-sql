@@ -186,6 +186,25 @@ WHERE qtd > 1
 
 > Subqueries complicam um pouco, mas ao meu ver o GORM consegue piorar essa complexidade!
 
+```go
+type Municipio struct {
+		Nome string
+		Ufs  string
+		Qtd  uint64
+	}
+	municipios := []Municipio{}
+	subquery := db.Table("municipios").
+		Select("municipio AS nome, STRING_AGG(uf, ',') AS ufs, COUNT(*) AS qtd").
+		Group("municipio").
+		Order("qtd DESC, municipio")
+	db.Model(&Municipio{}).
+		Table("(?) AS homonimos", subquery).
+		Where("qtd > 1").
+		Scan(&municipios)
+```
+
+> Código usando gorm para gerar um query equivalente
+
 ### Bônus…
 
 .Há também alguns recursos exclusivos de cada BD que nem sempre vão ser contemplados pelo seu ORM porque a intenção da maioria deles é ser uma camada de abstração. Vou deixar alguns exemplos peculiares do postgres.
