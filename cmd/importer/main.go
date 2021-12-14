@@ -41,6 +41,7 @@ type Municipio struct {
 func main() {
 	gormImport()
 	gormTransactionImport()
+	gormBatchImport()
 	pgxImport()
 	pgxTransactionImport()
 	pgxBatchImport()
@@ -99,7 +100,7 @@ func readAll() []Municipio {
 	return municipios
 }
 
-func gormImport() {
+func gormInit() *gorm.DB {
 	db, err := gorm.Open(postgres.Open(DSN), &gorm.Config{})
 	if err != nil {
 		panic(err)
@@ -112,6 +113,12 @@ func gormImport() {
 	if err := db.AutoMigrate(&Municipio{}); err != nil {
 		panic(err)
 	}
+
+	return db
+}
+
+func gormImport() {
+	db := gormInit()
 
 	fmt.Println("Importando dados…")
 	municipios := readAll()
@@ -125,23 +132,12 @@ func gormImport() {
 }
 
 func gormTransactionImport() {
-	db, err := gorm.Open(postgres.Open(DSN), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Removendo tabela…")
-	db.Exec("DROP TABLE municipios;")
-
-	fmt.Println("Criando tabela…")
-	if err := db.AutoMigrate(&Municipio{}); err != nil {
-		panic(err)
-	}
+	db := gormInit()
 
 	fmt.Println("Importando dados…")
 	municipios := readAll()
 	start := time.Now()
-	err = db.Transaction(func(tx *gorm.DB) error {
+	err := db.Transaction(func(tx *gorm.DB) error {
 		for _, m := range municipios {
 			if err := tx.Create(&m).Error; err != nil {
 				return err
@@ -157,28 +153,44 @@ func gormTransactionImport() {
 	fmt.Println("Tempo de importação com GORM (usando transação):", time.Since(start))
 }
 
-func pgxImport() {
-	ctx := context.Background()
-	db, err := pgx.Connect(ctx, DSN)
+func gormBatchImport() {
+	db := gormInit()
+
+	fmt.Println("Importando dados…")
+	municipios := readAll()
+
+	start := time.Now()
+	db.Create(&municipios)
+	fmt.Println("Tempo de importação com GORM (usando Batch):", time.Since(start))
+}
+
+func pgxInit() *pgx.Conn {
+	db, err := pgx.Connect(context.Background(), DSN)
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close(ctx)
 
 	fmt.Println("Removendo tabela…")
-	if _, err := db.Exec(ctx, "DROP TABLE municipios;"); err != nil {
+	_, err = db.Exec(context.Background(), "DROP TABLE municipios;")
+	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("Criando tabela…")
-	_, err = db.Exec(ctx, createTableSQL)
+	_, err = db.Exec(context.Background(), createTableSQL)
 	if err != nil {
 		panic(err)
 	}
 
+	return db
+}
+
+func pgxImport() {
+	db := pgxInit()
+
 	municipios := readAll()
 
-	_, err = db.Prepare(ctx, "insertMunicipio", insertSQL)
+	_, err := db.Prepare(context.Background(), "insertMunicipio", insertSQL)
 	if err != nil {
 		panic(err)
 	}
@@ -186,7 +198,7 @@ func pgxImport() {
 	fmt.Println("Importando dados…")
 	start := time.Now()
 	for _, m := range municipios {
-		_, err = db.Exec(ctx, "insertMunicipio", m.ID, m.Nome, m.UF, m.Populacao_2018, m.Populacao_2019, m.Populacao_2020, m.Populacao_2021)
+		_, err = db.Exec(context.Background(), "insertMunicipio", m.ID, m.Nome, m.UF, m.Populacao_2018, m.Populacao_2019, m.Populacao_2020, m.Populacao_2021)
 		if err != nil {
 			panic(err)
 		}
@@ -196,27 +208,11 @@ func pgxImport() {
 }
 
 func pgxTransactionImport() {
-	ctx := context.Background()
-	db, err := pgx.Connect(ctx, DSN)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close(ctx)
-
-	fmt.Println("Removendo tabela…")
-	if _, err := db.Exec(ctx, "DROP TABLE municipios;"); err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Criando tabela…")
-	_, err = db.Exec(ctx, createTableSQL)
-	if err != nil {
-		panic(err)
-	}
+	db := pgxInit()
 
 	municipios := readAll()
 
-	tx, err := db.Begin(ctx)
+	tx, err := db.Begin(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -224,34 +220,18 @@ func pgxTransactionImport() {
 	fmt.Println("Importando dados…")
 	start := time.Now()
 	for _, m := range municipios {
-		_, err = tx.Exec(ctx, insertSQL, m.ID, m.Nome, m.UF, m.Populacao_2018, m.Populacao_2019, m.Populacao_2020, m.Populacao_2021)
+		_, err = tx.Exec(context.Background(), insertSQL, m.ID, m.Nome, m.UF, m.Populacao_2018, m.Populacao_2019, m.Populacao_2020, m.Populacao_2021)
 		if err != nil {
 			panic(err)
 		}
 	}
-	tx.Commit(ctx)
+	tx.Commit(context.Background())
 
 	fmt.Println("Tempo de importação com PGX (usando transação):", time.Since(start))
 }
 
 func pgxBatchImport() {
-	ctx := context.Background()
-	db, err := pgx.Connect(ctx, DSN)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close(ctx)
-
-	fmt.Println("Removendo tabela…")
-	if _, err := db.Exec(ctx, "DROP TABLE municipios;"); err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Criando tabela…")
-	_, err = db.Exec(ctx, createTableSQL)
-	if err != nil {
-		panic(err)
-	}
+	db := pgxInit()
 
 	municipios := readAll()
 	batch := pgx.Batch{}
@@ -262,7 +242,7 @@ func pgxBatchImport() {
 		batch.Queue(insertSQL, m.ID, m.Nome, m.UF, m.Populacao_2018, m.Populacao_2019, m.Populacao_2020, m.Populacao_2021)
 	}
 
-	results := db.SendBatch(ctx, &batch)
+	results := db.SendBatch(context.Background(), &batch)
 	results.Close()
 
 	fmt.Println("Tempo de importação com PGX (usando Batch):", time.Since(start))
