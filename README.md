@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS municipios (
 
 Poderíamos ter uma coluna "ano" e apenas um coluna para população (quadruplicaria o número de registros) ou mesmo separar essa informação numa outra tabela, mas vamos manter assim para fins de simplificação.
 
+Reparem também no criação do índice único para as colunas nome e UF. Isso irá melhorar o desempenho das consultas e pode ser confirmado precedendo as *queries* com o comando EXPLAIN. Mais um ponto pra quem entende como o SQL funciona!
+
 ## Importando os dados
 
 Já vamos aproveitar para experimentar 5 métodos. Usaremos o **[GORM](https://gorm.io/)** e depois a biblioteca **[PGX](https://github.com/jackc/pgx)**. Após ler todos os registros do CSV e montar um *slice* com todos os valores devidamente convertidos, percorremos essa lista e contamos o tempo (daqui pra frente apenas) que demora para inserir todos os registros.
