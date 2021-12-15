@@ -1,6 +1,8 @@
 # ORM vs SQL (usando golang)
 
-O objetivo desse artigo é demonstrar porque muitos desenvolvedores preferem montar suas próprias *queries* a deixar as decisões por conta de um [ORM](https://pt.wikipedia.org/wiki/Mapeamento_objeto-relacional). Logicamente não se aplica a todos os casos e vai depender bastante da experiência do desenvolvedor e das situações envolvidas. Todos os códigos usados neste artigo ficarão disponíveis em: [https://github.com/hitalos/orm-vs-sql](https://github.com/hitalos/orm-vs-sql)
+O objetivo desse artigo é demonstrar porque muitos desenvolvedores preferem montar suas próprias *queries* a deixar as decisões por conta de um [ORM](https://pt.wikipedia.org/wiki/Mapeamento_objeto-relacional). Logicamente não se aplica a todos os casos e vai depender bastante da experiência do desenvolvedor e das situações envolvidas. Todos os códigos usados neste artigo ficarão disponíveis em: [https://github.com/hitalos/orm-vs-sql](https://github.com/hitalos/orm-vs-sql), que você pode usar para testar e compartilhar com outros desenvolvedores.
+
+Uma coisa particular da comunidade golang é que evitamos ter muitas dependências de outros projetos. Não chega a ser um efeito "node_modules", mas quanto menor a "superfície de contato", mais fácil de manter atualizado e menos chances de termos incidentes como este do "log4j" que tá aterrorizando os "javeiros" na data em que escrevo este artigo.
 
 Muitos argumentam que não precisam conhecer bem de SQL, já que o ORM resolve tudo sozinho. Em primeiro lugar, nem tudo! Além disso, a modelagem de um banco influencia muito nos resultados. Nem sempre seguir as "receitas" dos tutoriais vai ser suficiente.
 
