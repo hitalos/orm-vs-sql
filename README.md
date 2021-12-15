@@ -150,16 +150,16 @@ Mesmo não sendo um tempo alto, lembrem-se que quase sempre uma consulta não ba
 
 ```sql
 SELECT
-	municipio,
+	nome,
 	STRING_AGG(uf, ',') AS uf,
-	COUNT(municipio) AS qtd 
+	COUNT(*) AS qtd
 FROM
-	municipios 
+	municipios
 GROUP BY
-	municipio 
+	nome
 ORDER BY
 	qtd DESC,
-	municipio
+	nome
 LIMIT 10;
 ```
 
@@ -170,16 +170,16 @@ LIMIT 10;
 ```sql
 SELECT * FROM (
 	SELECT
-		municipio,
+		nome,
 		ARRAY_AGG(uf) AS uf,
-		COUNT(municipio) AS qtd 
+		COUNT(*) AS qtd
 	FROM
-		municipios 
+		municipios
 	GROUP BY
-		municipio 
+		nome
 	ORDER BY
 		qtd DESC,
-		municipio
+		nome
 ) AS homonimos
 WHERE qtd > 1
 ```
@@ -194,9 +194,9 @@ type Municipio struct {
 	}
 	municipios := []Municipio{}
 	subquery := db.Table("municipios").
-		Select("municipio AS nome, STRING_AGG(uf, ',') AS ufs, COUNT(*) AS qtd").
-		Group("municipio").
-		Order("qtd DESC, municipio")
+		Select("nome, STRING_AGG(uf, ',') AS ufs, COUNT(*) AS qtd").
+		Group("nome").
+		Order("qtd DESC, nome")
 	db.Model(&Municipio{}).
 		Table("(?) AS homonimos", subquery).
 		Where("qtd > 1").

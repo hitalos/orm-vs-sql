@@ -15,16 +15,16 @@ import (
 
 const (
 	DSN            = "host=localhost port=5432 user=postgres dbname=postgres password=postgres sslmode=disable"
-	insertSQL      = "INSERT INTO municipios (id, municipio, uf, populacao_2018, populacao_2019, populacao_2020, populacao_2021) VALUES ($1, $2, $3, $4, $5, $6, $7);"
+	insertSQL      = "INSERT INTO municipios (id, nome, uf, populacao_2018, populacao_2019, populacao_2020, populacao_2021) VALUES ($1, $2, $3, $4, $5, $6, $7);"
 	createTableSQL = `CREATE TABLE municipios (
 		id INTEGER NOT NULL PRIMARY KEY,
-		municipio VARCHAR NOT NULL,
+		nome VARCHAR NOT NULL,
 		uf VARCHAR(2) NOT NULL,
 		populacao_2018 INTEGER NOT NULL,
 		populacao_2019 INTEGER NOT NULL,
 		populacao_2020 INTEGER NOT NULL,
 		populacao_2021 INTEGER NOT NULL,
-		UNIQUE (municipio, uf)
+		UNIQUE (nome, uf)
 	);`
 )
 
